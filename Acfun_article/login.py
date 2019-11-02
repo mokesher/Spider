@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 import requests
 
-
 def Login():
     url = "https://id.app.acfun.cn/rest/web/login/signin"
     data = {
