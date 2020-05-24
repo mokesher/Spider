@@ -1,10 +1,10 @@
 #!/usr/bin/env python 
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding:utf-8 -*-
-import requests,re,json,threading,time,os,random
+import requests, re, json, threading, time, os, random
 from models import tosql
-from login import Login
+from login import login
 
 
 def acfun(url):
@@ -26,13 +26,13 @@ def article(data):
     article_title = data['title']
     url = "http://www.acfun.cn/v/ac" + str(id)
 
-    total_page = int(comment_count/50) + 1
-    for page in range(1, total_page+1):
+    total_page = int(comment_count / 50) + 1
+    for page in range(1, total_page + 1):
         print(page)
         req_url = f"https://www.acfun.cn/rest/pc-direct/comment/" \
-                      f"listByFloor?sourceId={id}&sourceType=3&page={page}&" \
-                      f"pivotCommentId=0&newPivotCommentId=0&_ts={int(100*time.time())}"
-        down(article_title, req_url, url,page)
+                  f"listByFloor?sourceId={id}&sourceType=3&page={page}&" \
+                  f"pivotCommentId=0&newPivotCommentId=0&_ts={int(100 * time.time())}"
+        down(article_title, req_url, url, page)
 
 
 def down(article_title, req_url, url, page):
@@ -47,7 +47,7 @@ def down(article_title, req_url, url, page):
             print("page:", page)
             print(content)
 
-            tosql(article_title,page,content,url)
+            tosql(article_title, page, content, url)
 
             # with open("%s.txt" % article_title, 'a+', encoding="utf-8") as article_write:
             #     article_write.write(article_title + '\n')
@@ -56,8 +56,9 @@ def down(article_title, req_url, url, page):
             #     article_write.write(url + '\n')
 
 
-login_session = Login()
-headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"}
+login_session = login()
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"}
 
 article_threading_list = []
 for page in range(1, 1000):
@@ -74,4 +75,3 @@ for page in range(1, 1000):
 
     for t in article_threading_list:
         t.join()
-

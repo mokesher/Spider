@@ -3,8 +3,8 @@
 import pymysql
 
 
-def tosql_fans(name,*args):
-    conn = pymysql.connect(host="localhost",user="root",password="root",database="spider",charset="utf8")
+def tosql_fans(name, *args):
+    conn = pymysql.connect(host="localhost", user="root", password="root", database="spider", charset="utf8")
     cursor = conn.cursor()
     cursor.execute("show tables")
     data = cursor.fetchall()
@@ -23,7 +23,7 @@ def tosql_fans(name,*args):
         cursor.execute(sql)
     else:
         sql = f"select href from {blog} where href=%s"
-        result = cursor.execute(sql,args[0])
+        result = cursor.execute(sql, args[0])
         if not result:
             sql = f"insert into {blog} (href,name,page) values(%s,%s,%s)"
             cursor.execute(sql, (args))
@@ -33,8 +33,8 @@ def tosql_fans(name,*args):
     conn.close()
 
 
-def tosql_follow(name,*args):
-    conn = pymysql.connect(host="localhost",user="root",password="root",database="spider",charset="utf8")
+def tosql_follow(name, *args):
+    conn = pymysql.connect(host="localhost", user="root", password="root", database="spider", charset="utf8")
     cursor = conn.cursor()
     cursor.execute("show tables")
     data = cursor.fetchall()
@@ -53,7 +53,7 @@ def tosql_follow(name,*args):
         cursor.execute(sql)
     else:
         sql = f"select href from {blog} where href=%s"
-        result = cursor.execute(sql,args[0])
+        result = cursor.execute(sql, args[0])
         if not result:
             sql = f"insert into {blog} (href,name,page) values(%s,%s,%s)"
             cursor.execute(sql, (args))
@@ -61,4 +61,3 @@ def tosql_follow(name,*args):
     conn.commit()
     cursor.close()
     conn.close()
-

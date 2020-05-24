@@ -1,2 +1,2 @@
 # Spider
-some little spider function to solve problems fast
+some little spider function to solve problems faster
