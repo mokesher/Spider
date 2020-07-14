@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import requests, re, json, threading, time, os, random
-from models import tosql
-from login import login
+from models import Sql
+from login import Login
+
+session = Login.login()
+to_sql = Sql()
 
 
 def acfun(url):
-    conn_list = login_session.get(url, headers=headers).text
+    conn_list = session.get(url, headers=Login.headers).text
     article_list = json.loads(conn_list)['data']['articleList']
     # article(article_list)
     t_list = []
@@ -22,27 +25,28 @@ def article(data):
     id = data['id']
     comment_count = data["comment_count"]
     article_title = data['title']
-    url = "http://www.acfun.cn/v/ac" + str(id)
+    url = "http://www.acfun.cn/a/ac" + str(id)
     total_page = int(comment_count / 50) + 1
 
     for page in range(1, total_page + 1):
-        print(page)
+        print(page, end="--")
         req_url = f"https://www.acfun.cn/rest/pc-direct/comment/listByFloor?sourceId={id}&sourceType=3&page={page}&pivotCommentId=0&newPivotCommentId=0&_ts={int(100 * time.time())}"
         down(article_title, req_url, url, page)
 
 
 def down(article_title, req_url, url, page):
-    article_con = json.loads(login_session.get(req_url, headers=headers).text)
+    article_con = json.loads(session.get(req_url, headers=Login.headers).text)
     article_txt = article_con["commentsMap"]
     for data in article_txt:
         user_name = article_txt[data]["userName"]
         content = article_txt[data]["content"]
-        if user_name == "***":
+        postDate = article_txt[data]["postDate"]
+        if user_name == "去无的止境":
             print("评论:", url)
             print("page:", page)
             print(content)
 
-            tosql(article_title, page, content, url)
+            to_sql.insert(article_title, page, content, url, postDate)
 
             # with open("%s.txt" % article_title, 'a+', encoding="utf-8") as article_write:
             #     article_write.write(article_title + '\n')
@@ -51,20 +55,17 @@ def down(article_title, req_url, url, page):
             #     article_write.write(url + '\n')
 
 
-login_session = login()
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"}
+def main(url, start, end):
+    article_thread_list = []
+    for page in range(start, end):
+        print("\n第%s页" % page)
+        url = re.sub("pageNo=\d+", f"pageNo={page}", url)
+        # acfun(url)
 
-article_threading_list = []
-for page in range(1, 1000):
-    print("第%s页" % page)
+        t = threading.Thread(target=acfun, args=(url,))
+        t.start()
+        article_thread_list.append(t)
+        for t in article_thread_list:
+            t.join()
 
-    url = f"https://webapi.acfun.cn/query/article/list?pageNo={page}&size=10&realmIds=25%2C34%2C7%2C6%2C17%2C1%2C2&originalOnly=true&orderType=1&periodType=-1&filterTitleImage=true"
-
-    acfun(url)
-    t = threading.Thread(target=acfun, args=(url,))
-    t.start()
-    article_threading_list.append(t)
-
-    for t in article_threading_list:
-        t.join()
+    to_sql.close()
